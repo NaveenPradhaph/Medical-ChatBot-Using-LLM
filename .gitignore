@@ -2,3 +2,5 @@ mchatbot
 model/llama-2-7b-chat.ggmlv3.q4_0.bin
 data/*
 .env
+Medical_Chatbot.egg-info
+src/__pycache__
