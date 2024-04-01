@@ -2,6 +2,7 @@ from flask import Flask, render_template, jsonify, request
 from src.helper import download_hugging_face_embeddings
 from langchain.vectorstores import Pinecone
 import pinecone
+import psycopg2
 from langchain.prompts import PromptTemplate
 from langchain.llms import CTransformers
 from langchain.chains import RetrievalQA
@@ -15,6 +16,15 @@ load_dotenv()
 
 PINECONE_API_KEY = os.environ.get('PINECONE_API_KEY')
 PINECONE_API_ENV = os.environ.get('PINECONE_API_ENV')
+url = os.environ.get("DATABASE_URL")  # gets variables from environment
+
+connection = psycopg2.connect(url)
+
+CREATE_CHAT_TABLE = (
+    "CREATE TABLE IF NOT EXISTS chats (id SERIAL PRIMARY KEY, question TEXT, answer TEXT);"
+)
+
+INSERT_CHAT_RETURN_ID = "INSERT INTO chats (question,answer) VALUES (%s,%s) RETURNING id;"
 
 
 embeddings = download_hugging_face_embeddings()
@@ -53,7 +63,6 @@ def index():
     return render_template('chat.html')
 
 
-
 @app.route("/get", methods=["GET", "POST"])
 def chat():
     msg = request.form["msg"]
@@ -61,8 +70,18 @@ def chat():
     print(input)
     result=qa({"query": input})
     print("Response : ", result["result"])
+    create_chat(input,result["result"])
     return str(result["result"])
 
+def create_chat(qus,ans):
+    question = qus
+    answer = ans
+    with connection:
+        with connection.cursor() as cursor:
+            cursor.execute(CREATE_CHAT_TABLE)
+            cursor.execute(INSERT_CHAT_RETURN_ID, (question,answer))
+            chat_id = cursor.fetchone()[0]
+    return {"id": chat_id, "message": f"chat {question,answer} created."}, 201
 
 
 if __name__ == '__main__':

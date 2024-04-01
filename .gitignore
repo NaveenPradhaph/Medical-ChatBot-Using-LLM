@@ -4,3 +4,8 @@ data/*
 .env
 Medical_Chatbot.egg-info
 src/__pycache__
+input
+output
+output_folder_path
+try
+dump.py
