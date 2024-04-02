@@ -19,37 +19,59 @@ This is a Flask-based medical chatbot application that leverages Hugging Face em
 
 ## Installation
 
-1. Clone the repository:
+1. **Clone the repository**:
 
-```bash
-git clone https://github.com/your-username/medical-chatbot.git
-cd medical-chatbot
-```
+    ```bash
+    git clone https://github.com/NaveenPradhaph/D-Nexus
+    cd medical-chatbot
+    ```
 
-2. Install dependencies:
 
-```bash
-pip install -r requirements.txt
-```
+3. **Install dependencies:**
 
-3. Set up environment variables:
+    ```bash
+    pip install -r requirements.txt
+    ```
+2. **Create a `.env` file**
 
-```bash
-PINECONE_API_KEY = "xxxxx-xxxx-xxxx"
-PINECONE_API_ENV = "xxxxx"
+4. **Set up environment variables:**
 
-NEON_USERNAME = "xxxx"
-NEON_PASSWORD = "xxxx"
-NEON_HOST = "xx-xxx-xxxxxx"
-NEON_PORT = "xxxx"
-NEON_PROJECT = "xxxx"
-```
+    ```bash
+    PINECONE_API_KEY = "xxxxx-xxxx-xxxx"
+    PINECONE_API_ENV = "xxxxx"
 
-4. Run the application:
+    NEON_USERNAME = "xxxx"
+    NEON_PASSWORD = "xxxx"
+    NEON_HOST = "xx-xxx-xxxxxx"
+    NEON_PORT = "xxxx"
+    NEON_PROJECT = "xxxx"
+    ```
 
-```bash
-python app.py
-```
+4. **Download the model from huggingface:**
+
+    *Select the model according to the system requirements if the RAM is less than **16GB** it is advisable to select the lesser bit model such as 2-bit or 4-bit model*
+    
+    You can use this 
+    [TheBloke/Llama-2-7B-GGML](https://huggingface.co/TheBloke/Llama-2-7B-GGML/tree/main)
+
+    *save the model in the folder named **model***
+
+5. **Data for the model:**
+
+    *The data for the model are multiple pdf's that are store in the folder named **data***
+    >Important note the pdf's must be editable not scanned pdf
+
+    *run the following code to store the vectors in the Pinecone vector stores*
+
+    ```bash
+    python store_index.py
+    ```
+
+5. **Run the application:**
+
+    ```bash
+    python app.py
+    ```
 
 ## Usage
 
