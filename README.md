@@ -61,7 +61,7 @@ This is a Flask-based medical chatbot application that leverages Hugging Face em
     *The data for the model are multiple pdf's that are store in the folder named **data***
     >Important note the pdf's must be editable not scanned pdf
 
-    *run the following code to store the vectors in the Pinecone vector stores*
+    *run the following code only once to store the vectors in the Pinecone vector stores*
 
     ```bash
     python store_index.py
