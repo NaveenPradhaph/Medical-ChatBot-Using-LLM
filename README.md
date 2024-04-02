@@ -23,7 +23,7 @@ This is a Flask-based medical chatbot application that leverages Hugging Face em
 
     ```bash
     git clone https://github.com/NaveenPradhaph/D-Nexus
-    cd medical-chatbot
+    cd D-Nexus
     ```
 
 
