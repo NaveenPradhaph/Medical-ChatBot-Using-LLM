@@ -9,3 +9,4 @@ output
 output_folder_path
 try
 dump.py
+templates/try.html

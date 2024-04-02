@@ -9,6 +9,7 @@ from langchain.chains import RetrievalQA
 from dotenv import load_dotenv
 from src.prompt import *
 import os
+from datetime import datetime,timezone
 
 app = Flask(__name__)
 
@@ -16,16 +17,24 @@ load_dotenv()
 
 PINECONE_API_KEY = os.environ.get('PINECONE_API_KEY')
 PINECONE_API_ENV = os.environ.get('PINECONE_API_ENV')
-url = os.environ.get("DATABASE_URL")  # gets variables from environment
 
-connection = psycopg2.connect(url)
+USERNAME = os.environ.get('NEON_USERNAME')
+PASSWORD = os.environ.get('NEON_PASSWORD')
+HOST = os.environ.get('NEON_HOST')
+PORT = os.environ.get('NEON_PORT')
+PROJECT = os.environ.get('NEON_PROJECT')
+
+conn_str = f"dbname={PROJECT} user={USERNAME} password={PASSWORD} host={HOST} port={PORT} sslmode=require"
+
+connection = psycopg2.connect(conn_str)
 
 CREATE_CHAT_TABLE = (
-    "CREATE TABLE IF NOT EXISTS chats (id SERIAL PRIMARY KEY, question TEXT, answer TEXT);"
+    "CREATE TABLE IF NOT EXISTS chats (id SERIAL PRIMARY KEY, question TEXT, answer TEXT, date TEXT);"
 )
 
-INSERT_CHAT_RETURN_ID = "INSERT INTO chats (question,answer) VALUES (%s,%s) RETURNING id;"
+INSERT_CHAT_RETURN_ID = "INSERT INTO chats (question,answer,date) VALUES (%s,%s,%s) RETURNING id;"
 
+GET_CHAT = "SELECT * FROM chats;"
 
 embeddings = download_hugging_face_embeddings()
 
@@ -56,11 +65,18 @@ qa=RetrievalQA.from_chain_type(
     return_source_documents=True, 
     chain_type_kwargs=chain_type_kwargs)
 
-
+@app.get("/get")
+def get_chat():
+    with connection:
+        with connection.cursor() as cursor:
+            cursor.execute(GET_CHAT)
+            chat_data = cursor.fetchall()
+    return chat_data
+chat_data = get_chat()
 
 @app.route("/")
 def index():
-    return render_template('chat.html')
+    return render_template('chat.html',data = chat_data)
 
 
 @app.route("/get", methods=["GET", "POST"])
@@ -76,13 +92,21 @@ def chat():
 def create_chat(qus,ans):
     question = qus
     answer = ans
+
+    now = datetime.now(timezone.utc)
+    day = now.day
+    month = now.month
+    year = now.year
+    hour = now.hour
+    minute = now.minute
+    date = f"{day:02d}/{month:02d}/{year-2000:02d} {hour:02d}:{minute:02d}"
+
     with connection:
         with connection.cursor() as cursor:
             cursor.execute(CREATE_CHAT_TABLE)
-            cursor.execute(INSERT_CHAT_RETURN_ID, (question,answer))
+            cursor.execute(INSERT_CHAT_RETURN_ID, (question,answer,date))
             chat_id = cursor.fetchone()[0]
-    return {"id": chat_id, "message": f"chat {question,answer} created."}, 201
-
+    return {"id": chat_id, "message": f"chat {question,answer} created in neon DB."}, 201
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port= 8080, debug= True)
